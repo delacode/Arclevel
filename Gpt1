@@ -3,7 +3,16 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ARC//LEVEL — Dark Futuristic Leveling</title>
+<title>ARC//LEVEL — Dark Futuristic Leveling</<!-- iOS fullscreen + status bar -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ARC//LEVEL">
+<meta name="theme-color" content="#0a0b12">
+
+<!-- App icons (put files in ./icons/) -->
+<link rel="apple-touch-icon" href="icons/icon-180.png">   <!-- iOS home screen -->
+<link rel="icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" sizes="512x512" href="icons/icon-512.png">
 <style>
   :root{
     --bg:#0a0b12; --panel:#0f1322; --panel-2:#0c1020; --ink:#e9eeff; --muted:#9aa6c4;
