@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ARC//LEVEL — Dark Futuristic Leveling</title>
+<style>
+  :root{
+    --bg:#0a0b12; --panel:#0f1322; --panel-2:#0c1020; --ink:#e9eeff; --muted:#9aa6c4;
+    --pri:#7aa2ff; --sec:#ff87d1; --good:#6ee7a7; --bad:#ff6b6b; --warn:#ffd166; --ring:#2a3a88;
+    --grid: radial-gradient(1000px 600px at 20% -10%, #5a6fff18, transparent),
+            radial-gradient(900px 500px at 120% 20%, #ff73c620, transparent);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background-image:var(--grid);
+  }
+  .wrap{max-width:1080px; margin:24px auto 96px; padding:0 16px}
+  header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px}
+  .brand{display:flex; gap:12px; align-items:center}
+  .logo{width:44px; height:44px; border-radius:12px; background:
+    conic-gradient(from 0deg, var(--pri), var(--sec), var(--pri));
+    box-shadow: 0 12px 40px #0008, inset 0 0 0 1px #ffffff12}
+  h1{font-size:1.25rem; margin:0}
+  .sub{color:var(--muted); font-size:.9rem}
+  .grid{display:grid; grid-template-columns:1.1fr .9fr; gap:16px}
+  @media (max-width:960px){ .grid{grid-template-columns:1fr} }
+  .card{background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border-radius:16px; padding:16px; box-shadow: 0 10px 30px #0009, inset 0 0 0 1px #ffffff14; position:relative; overflow:hidden}
+  .card h2{margin:0 0 12px; font-size:1.05rem}
+  .row{display:grid; grid-template-columns:repeat(12,1fr); gap:12px}
+  .col-6{grid-column:span 6} .col-4{grid-column:span 4} .col-3{grid-column:span 3} .col-12{grid-column:span 12}
+  label{display:block; font-size:.82rem; color:var(--muted); margin-bottom:6px}
+  input, select, textarea{
+    width:100%; padding:10px 12px; border-radius:12px; border:1px solid #ffffff1a;
+    background:#0b0f1e; color:var(--ink); outline:none;
+  }
+  input:focus{box-shadow:0 0 0 2px #7aa2ff44}
+  .switch{display:flex; align-items:center; gap:10px}
+  .switch input{width:auto}
+  .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#ffffff12; color:var(--muted)}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:12px; cursor:pointer;
+    background:linear-gradient(90deg, var(--pri), #6c8aff); color:#fff; border:0; box-shadow: 0 10px 26px #2a3a8833;
+    transition:transform .06s ease, filter .2s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:#ffffff10; color:var(--ink); border:1px solid #ffffff1a}
+  .statbar{height:10px; background:#ffffff10; border-radius:999px; overflow:hidden}
+  .statbar>span{display:block; height:100%; background:linear-gradient(90deg, var(--pri), var(--sec))}
+  .kpi{display:grid; grid-template-columns: repeat(3,1fr); gap:10px}
+  .kpi .tile{background:#0a0e1c; border-radius:12px; padding:12px; border:1px solid #ffffff14}
+  .tile h3{margin:0 0 8px; font-size:.9rem; color:#c8d2ff}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .flex{display:flex; gap:8px; align-items:center}
+  .right{margin-left:auto}
+  .hint{color:var(--muted); font-size:.78rem}
+  .danger{color:var(--bad)}
+  .ok{color:var(--good)}
+  .footer{margin-top:18px; display:flex; gap:8px; flex-wrap:wrap}
+  .badge{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#ffffff12; color:#cfe1ff; font-size:.8rem}
+  .small{font-size:.78rem}
+  .section{margin-top:12px; padding-top:12px; border-top:1px dashed #ffffff22}
+  .ghost-input{display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 12px; background:#ffffff0d; border:1px dashed #ffffff22; border-radius:10px}
+  .danger-btn{background:linear-gradient(90deg, #ff6b6b, #ff3b7f)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>ARC//LEVEL</h1>
+          <div class="sub">Solo‑Leveling‑style stats. Daily penalties. Weekly grind. Local save.</div>
+        </div>
+      </div>
+      <div class="pill"><span>🗄️</span><span id="saveStatus">Auto‑saved</span></div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: INPUT -->
+      <section class="card">
+        <h2>Log Today</h2>
+        <div class="row">
+          <div class="col-4">
+            <label for="logDate">Date</label>
+            <input type="date" id="logDate" />
+          </div>
+
+          <!-- Performance inputs (point-in-time, not daily) -->
+          <div class="col-4">
+            <label>Stamina — 2.4 km time (mm:ss)</label>
+            <div class="flex">
+              <input id="staminaMin" type="number" min="0" placeholder="mm">
+              <span>:</span>
+              <input id="staminaSec" type="number" min="0" max="59" placeholder="ss">
+            </div>
+            <div class="hint small">12:00 = 50 pts; every <b>6.2s faster</b> +1.</div>
+          </div>
+
+          <div class="col-4">
+            <label>Speed — 400 m time (seconds)</label>
+            <input id="speedSec" type="number" min="0" step="0.01" placeholder="e.g., 69.50">
+            <div class="hint small">71.1 s = 50 pts; every <b>0.56s faster</b> +1.</div>
+          </div>
+
+          <div class="col-4">
+            <label>Strength — consecutive pushups</label>
+            <input id="pushups" type="number" min="0" max="200" placeholder="e.g., 55">
+            <div class="hint small">50 pushups = 50 pts; each pushup = +1.</div>
+          </div>
+
+          <div class="col-4">
+            <label>Looks — body fat %</label>
+            <input id="bodyfat" type="number" min="3" max="60" step="0.01" placeholder="e.g., 24.5">
+            <div class="hint small">30% = 0 pts; every <b>0.18%</b> lower +1.</div>
+          </div>
+
+          <!-- Daily toggles -->
+          <div class="col-12 section">
+            <h3 class="small">Daily Checks (penalties apply if missed)</h3>
+            <div class="row">
+              <div class="col-6">
+                <div class="ghost-input">
+                  <div>
+                    <strong>Discipline</strong>
+                    <div class="hint small">Calories tracked on MFP (+0.25) • 7am wake <em>and</em> 8h sleep (+0.5)</div>
+                  </div>
+                  <div>
+                    <div class="switch"><input id="discCalories" type="checkbox"> <label>Tracked calories</label></div>
+                    <div class="switch"><input id="discSleep" type="checkbox"> <label>Woke 7:00 + 8h sleep</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="ghost-input">
+                  <div>
+                    <strong>Hygiene</strong>
+                    <div class="hint small">Shower 2×, skincare AM+PM, brush 2× → if ALL true: +2, otherwise −2</div>
+                  </div>
+                  <div>
+                    <div class="switch"><input id="hyShower" type="checkbox"> <label>Shower 2×</label></div>
+                    <div class="switch"><input id="hySkin" type="checkbox"> <label>Skincare AM/PM</label></div>
+                    <div class="switch"><input id="hyBrush" type="checkbox"> <label>Brush 2×</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="ghost-input">
+                  <div>
+                    <strong>Posture</strong>
+                    <div class="hint small">Did posture exercises (+1) else −1</div>
+                  </div>
+                  <div class="switch"><input id="postureDid" type="checkbox"> <label>Completed</label></div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="ghost-input">
+                  <div>
+                    <strong>Intelligence</strong>
+                    <div class="hint small">Goal: ≥60 min study per day. If you do this for ALL 7 days of a week, +1 that week.</div>
+                  </div>
+                  <div class="flex">
+                    <label class="small">Study minutes today</label>
+                    <input id="studyMin" type="number" min="0" step="1" style="width:110px">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="flex">
+              <button id="saveLog" class="btn">Save Today</button>
+              <button id="recalc" class="btn ghost">Recalculate All</button>
+              <span class="right hint">All data is local to your browser.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: OUTPUT -->
+      <section class="card">
+        <h2>Stats</h2>
+        <div class="kpi">
+          <div class="tile">
+            <h3>Stamina</h3>
+            <div class="statbar"><span id="barStamina" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valStamina">0.0</span><span class="hint right" id="descStamina">—</span></div>
+          </div>
+          <div class="tile">
+            <h3>Speed</h3>
+            <div class="statbar"><span id="barSpeed" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valSpeed">0.0</span><span class="hint right" id="descSpeed">—</span></div>
+          </div>
+          <div class="tile">
+            <h3>Strength</h3>
+            <div class="statbar"><span id="barStrength" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valStrength">0.0</span><span class="hint right" id="descStrength">—</span></div>
+          </div>
+        </div>
+
+        <div class="kpi" style="margin-top:10px">
+          <div class="tile">
+            <h3>Intelligence</h3>
+            <div class="statbar"><span id="barIntel" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valIntel">0</span><span class="hint right" id="descIntel">+1 per full week</span></div>
+          </div>
+          <div class="tile">
+            <h3>Discipline</h3>
+            <div class="statbar"><span id="barDisc" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valDisc">0.00</span><span class="hint right" id="descDisc">±0.25 / ±0.5 daily</span></div>
+          </div>
+          <div class="tile">
+            <h3>Looks</h3>
+            <div class="statbar"><span id="barLooks" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valLooks">0.0</span><span class="hint right" id="descLooks">From body fat</span></div>
+          </div>
+        </div>
+
+        <div class="kpi" style="margin-top:10px">
+          <div class="tile">
+            <h3>Hygiene</h3>
+            <div class="statbar"><span id="barHyg" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valHyg">0</span><span class="hint right" id="descHyg">±2 daily</span></div>
+          </div>
+          <div class="tile">
+            <h3>Posture</h3>
+            <div class="statbar"><span id="barPost" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valPost">0</span><span class="hint right" id="descPost">±1 daily</span></div>
+          </div>
+          <div class="tile">
+            <h3>Total Power</h3>
+            <div class="statbar"><span id="barTotal" style="width:0%"></span></div>
+            <div class="flex small"><span class="mono" id="valTotal">0.0</span><span class="hint right">Avg of all capped 0–100</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="footer">
+            <button id="exportBtn" class="btn ghost">Export JSON</button>
+            <label class="btn ghost" style="cursor:pointer">
+              Import JSON <input type="file" id="importFile" accept="application/json" style="display:none">
+            </label>
+            <button id="wipeBtn" class="btn danger-btn">Wipe All</button>
+          </div>
+          <div class="hint small">Penalties: If you miss a day for Discipline/Hygiene/Posture, you lose the amount you would have gained that day.</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- HISTORY -->
+    <section class="card" style="margin-top:16px">
+      <h2>History</h2>
+      <div id="history"></div>
+    </section>
+
+  </div>
+
+<script>
+/* ======= UTIL ======= */
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const fmt=(n,dec=1)=>Number.isFinite(n)?n.toFixed(dec):'0.0';
+const byId=id=>document.getElementById(id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const toISO=(d)=>new Date(d+"T00:00:00");
+
+/* ======= STORAGE ======= */
+const storeKey="arclevel_v1";
+let db = JSON.parse(localStorage.getItem(storeKey)||'{"logs":{},"perf":{}}');
+
+/* db structure:
+{
+  perf:{ staminaSec: null, speed400: null, pushups:null, bodyfat:null },
+  logs:{
+    "YYYY-MM-DD":{
+       discCalories:true/false, discSleep:true/false,
+       hyShower:true/false, hySkin:true/false, hyBrush:true/false,
+       postureDid:true/false, studyMin:number
+    },
+    ...
+  }
+}
+*/
+
+function save(){
+  localStorage.setItem(storeKey, JSON.stringify(db));
+  byId('saveStatus').textContent='Saved ✔';
+  setTimeout(()=>byId('saveStatus').textContent='Auto‑saved',1200);
+}
+
+/* ======= INPUT INIT ======= */
+function initDate(){
+  const el=byId('logDate');
+  el.value = todayStr();
+}
+
+function loadInputsFromPerf(){
+  const p=db.perf||{};
+  if(p.staminaSec!=null){
+    const mm=Math.floor(p.staminaSec/60), ss=Math.round(p.staminaSec%60);
+    byId('staminaMin').value=mm; byId('staminaSec').value=ss;
+  }
+  if(p.speed400!=null) byId('speedSec').value=p.speed400;
+  if(p.pushups!=null) byId('pushups').value=p.pushups;
+  if(p.bodyfat!=null) byId('bodyfat').value=p.bodyfat;
+}
+
+function readPerfFromInputs(){
+  const mm=Number(byId('staminaMin').value||0), ss=Number(byId('staminaSec').value||0);
+  const staminaSec = mm*60 + ss;
+  const speed400 = Number(byId('speedSec').value||NaN);
+  const pushups = Number(byId('pushups').value||NaN);
+  const bodyfat = Number(byId('bodyfat').value||NaN);
+  return {staminaSec, speed400, pushups, bodyfat};
+}
+
+/* ======= SAVE TODAY LOG ======= */
+byId('saveLog').addEventListener('click', ()=>{
+  // perf (overwrite with latest known bests/values as you enter them)
+  const perf=readPerfFromInputs();
+  db.perf = {
+    staminaSec: Number.isFinite(perf.staminaSec)&&perf.staminaSec>0 ? perf.staminaSec : (db.perf?.staminaSec ?? null),
+    speed400:  Number.isFinite(perf.speed400) ? perf.speed400 : (db.perf?.speed400 ?? null),
+    pushups:   Number.isFinite(perf.pushups)  ? perf.pushups  : (db.perf?.pushups ?? null),
+    bodyfat:   Number.isFinite(perf.bodyfat)  ? perf.bodyfat  : (db.perf?.bodyfat ?? null),
+  };
+
+  // daily log
+  const d=byId('logDate').value || todayStr();
+  db.logs[d] = {
+    discCalories: !!byId('discCalories').checked,
+    discSleep: !!byId('discSleep').checked,
+    hyShower: !!byId('hyShower').checked,
+    hySkin: !!byId('hySkin').checked,
+    hyBrush: !!byId('hyBrush').checked,
+    postureDid: !!byId('postureDid').checked,
+    studyMin: Number(byId('studyMin').value || 0)
+  };
+  save();
+  recalcAndRender();
+  flashRow(d);
+});
+
+/* ======= MAPPINGS (YOUR RULES) ======= */
+// Stamina: 12:00 (720s) = 50; every 6.2s faster +1
+function staminaPoints(sec){
+  if(!Number.isFinite(sec) || sec<=0) return 0;
+  const base=50 + ((720 - sec) / 6.2);
+  return clamp(base, 1, 100);
+}
+// Speed: 400m -> 71.1s = 50; every 0.56s faster +1
+function speedPoints(sec400){
+  if(!Number.isFinite(sec400) || sec400<=0) return 0;
+  const base=50 + ((71.1 - sec400) / 0.56);
+  return clamp(base, 1, 100);
+}
+// Strength: pushups -> 50 = 50; +1 per rep
+function strengthPoints(pushups){
+  if(!Number.isFinite(pushups) || pushups<=0) return 0;
+  return clamp(pushups, 1, 100);
+}
+// Looks: 30% = 0; every 0.18% lower +1
+function looksPoints(bodyfat){
+  if(!Number.isFinite(bodyfat) || bodyfat<=0) return 0;
+  const pts = (30 - bodyfat) / 0.18;
+  return clamp(pts, 0, 100);
+}
+
+/* ======= DAILY ACCUMULATION WITH PENALTIES ======= 
+   Discipline: +0.25 if calories tracked; +0.5 if wake7+8h; else negative of each missed.
+   Hygiene: if ALL three true → +2; else → −2
+   Posture: +1 if done; else −1
+   Intelligence: +1 per ISO week where ALL 7 days have studyMin >= 60.
+*/
+function sumDailyStats(logs){
+  let discipline=0, hygiene=0, posture=0;
+
+  for(const day in logs){
+    const L=logs[day];
+    // Discipline
+    discipline += (L.discCalories ? +0.25 : -0.25);
+    discipline += (L.discSleep ? +0.5  : -0.5);
+    // Hygiene
+    const allH = !!(L.hyShower && L.hySkin && L.hyBrush);
+    hygiene += allH ? +2 : -2;
+    // Posture
+    posture += (L.postureDid ? +1 : -1);
+  }
+  return {discipline, hygiene, posture};
+}
+
+// ISO week utilities
+function isoWeekKey(dateStr){
+  const d = toISO(dateStr);
+  // ISO week logic
+  const dayNum = (d.getUTCDay() + 6) % 7; // Mon=0..Sun=6
+  const thursday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dayNum + 3));
+  const week1 = new Date(Date.UTC(thursday.getUTCFullYear(),0,4));
+  const weekNum = 1 + Math.round(((thursday - week1) / 86400000 - 3 + ((week1.getUTCDay()+6)%7)) / 7);
+  return `${thursday.getUTCFullYear()}-W${String(weekNum).padStart(2,'0')}`;
+}
+
+function computeIntelligence(logs){
+  // group minutes by iso week, check if all 7 days >= 60
+  const weeks = {};
+  for(const day in logs){
+    const key = isoWeekKey(day);
+    if(!weeks[key]) weeks[key] = {};
+    weeks[key][day] = logs[day].studyMin || 0;
+  }
+  let intel=0;
+  for(const w in weeks){
+    const days = weeks[w];
+    // need to ensure 7 distinct dates inside that ISO week are present with >=60
+    // We'll compute over the actual 7 dates of that week
+    const [yearPart, wkPart] = w.split("-W");
+    const year = Number(yearPart), wk = Number(wkPart);
+    // get Monday of ISO week
+    const simple = new Date(Date.UTC(year,0,4 + (wk-1)*7));
+    const dow = (simple.getUTCDay()+6)%7;
+    const monday = new Date(simple); monday.setUTCDate(simple.getUTCDate() - dow);
+    let allSeven=true;
+    for(let i=0;i<7;i++){
+      const d = new Date(monday); d.setUTCDate(monday.getUTCDate()+i);
+      const ds = d.toISOString().slice(0,10);
+      const mins = days[ds] ?? 0;
+      if(mins < 60){ allSeven=false; break; }
+    }
+    if(allSeven) intel += 1;
+  }
+  return intel;
+}
+
+/* ======= RECALC + RENDER ======= */
+function recalcAndRender(){
+  // performance-derived stats
+  const p=db.perf||{};
+  const stam = staminaPoints(p.staminaSec);
+  const spd  = speedPoints(p.speed400);
+  const str  = strengthPoints(p.pushups);
+  const lks  = looksPoints(p.bodyfat);
+
+  // daily accumulative stats
+  const {discipline, hygiene, posture} = sumDailyStats(db.logs||{});
+  const intel = computeIntelligence(db.logs||{});
+
+  // capped 0–100 visuals (your range is 1–100 for some; we clamp visuals)
+  setStat('Stamina', stam, `${fmt(p.staminaSec??0,0)}s`);
+  setStat('Speed', spd, `${fmt(p.speed400??0,2)}s`);
+  setStat('Strength', str, `${p.pushups??0} reps`);
+  setStat('Looks', lks, `${p.bodyfat??0}%`);
+  setStat('Discipline', clamp(discipline,0,100), `${discipline>=0?'+':''}${discipline.toFixed(2)} total`);
+  setStat('Hygiene', clamp(hygiene,0,100), `${hygiene>=0?'+':''}${hygiene.toFixed(0)} total`);
+  setStat('Posture', clamp(posture,0,100), `${posture>=0?'+':''}${posture.toFixed(0)} total`);
+  setStat('Intelligence', clamp(intel,0,100), `${intel} full weeks`);
+
+  // total power = average of the eight categories after clamping to 0–100
+  const arr=[stam,spd,str,intel,discipline,hygiene,posture,lks].map(x=>clamp(x,0,100));
+  const total = arr.reduce((a,b)=>a+b,0)/arr.length;
+  byId('barTotal').style.width = `${total}%`;
+  byId('valTotal').textContent = fmt(total,1);
+
+  // history table
+  renderHistory();
+}
+
+function setStat(name,val,desc){
+  const map={
+    'Stamina':['barStamina','valStamina','descStamina'],
+    'Speed':['barSpeed','valSpeed','descSpeed'],
+    'Strength':['barStrength','valStrength','descStrength'],
+    'Intelligence':['barIntel','valIntel','descIntel'],
+    'Discipline':['barDisc','valDisc','descDisc'],
+    'Looks':['barLooks','valLooks','descLooks'],
+    'Hygiene':['barHyg','valHyg','descHyg'],
+    'Posture':['barPost','valPost','descPost'],
+  };
+  const [bar,valEl,descEl]=map[name];
+  byId(bar).style.width = `${clamp(val,0,100)}%`;
+  byId(valEl).textContent = (name==='Discipline') ? fmt(val,2) : (name==='Intelligence' ? fmt(val,0) : fmt(val,1));
+  byId(descEl).textContent = desc;
+}
+
+/* ======= HISTORY RENDER ======= */
+function renderHistory(){
+  const container = byId('history');
+  const entries = Object.entries(db.logs).sort((a,b)=> a[0]<b[0]?-1:1);
+  if(entries.length===0){ container.innerHTML='<div class="hint">No logs yet. Log today to begin.</div>'; return; }
+  let html = `
+    <div class="row small" style="font-weight:600; color:#c8d2ff">
+      <div class="col-3">Date</div>
+      <div class="col-3">Discipline Δ</div>
+      <div class="col-3">Hygiene Δ</div>
+      <div class="col-3">Posture Δ</div>
+    </div>
+  `;
+  for(const [d,L] of entries){
+    const disc = (L.discCalories?+0.25:-0.25) + (L.discSleep?+0.5:-0.5);
+    const hyg = (L.hyShower && L.hySkin && L.hyBrush) ? +2 : -2;
+    const post = (L.postureDid ? +1 : -1);
+    html += `
+      <div class="row small">
+        <div class="col-3 mono">${d}</div>
+        <div class="col-3 ${disc>=0?'ok':'danger'}">${disc>=0?'+':''}${disc.toFixed(2)}</div>
+        <div class="col-3 ${hyg>=0?'ok':'danger'}">${hyg>=0?'+':''}${hyg.toFixed(0)}</div>
+        <div class="col-3 ${post>=0?'ok':'danger'}">${post>=0?'+':''}${post.toFixed(0)}</div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+function flashRow(dateStr){
+  // (simple UX ping — can be enhanced if desired)
+}
+
+/* ======= IMPORT / EXPORT / WIPE ======= */
+byId('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`arclevel_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+byId('importFile').addEventListener('change', (e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data.logs || !data.perf) throw new Error('Invalid file');
+      db=data; save(); loadInputsFromPerf(); recalcAndRender();
+    }catch(err){ alert('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+});
+
+byId('wipeBtn').addEventListener('click', ()=>{
+  if(confirm('Wipe ALL data?')){
+    db={logs:{}, perf:{}};
+    save(); loadInputsFromPerf(); recalcAndRender();
+  }
+});
+
+/* ======= RECALC BUTTON ======= */
+byId('recalc').addEventListener('click', recalcAndRender);
+
+/* ======= STARTUP ======= */
+initDate();
+loadInputsFromPerf();
+recalcAndRender();
+</script>
+</body>
+</html>
