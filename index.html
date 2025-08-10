@@ -76,7 +76,7 @@
   .badge{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#ffffff12; color:#cfe1ff; font-size:.8rem}
   .small{font-size:.78rem}
   .section{margin-top:12px; padding-top:12px; border-top:1px dashed #ffffff22}
-  .ghost-input{display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 12px; background:#ffffff0d; border:1px dashed #ffffff22; border-radius:10px}
+  .ghost-input{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:8px 12px; background:#ffffff0d; border:1px dashed #ffffff22; border-radius:10px}
   .danger-btn{background:linear-gradient(90deg, #ff6b6b, #ff3b7f)}
 
   /* === TOTAL POWER HERO === */
@@ -87,25 +87,16 @@
     box-shadow:0 20px 50px #0009, inset 0 0 0 1px #ffffff12;
   }
   .total-hero h3{margin:0; font-size:1.05rem; color:#cfe1ff; letter-spacing:.02em}
-  .total-hero .big{
-    font-size:42px; line-height:1; font-weight:800; letter-spacing:.5px;
-    text-shadow:0 0 20px #6c8aff55, 0 0 4px #6c8aff33;
-  }
-  .total-hero .sub{color:var(--muted); margin-top:6px}
+  .total-hero .big{font-size:42px; line-height:1; font-weight:800; letter-spacing:.5px; text-shadow:0 0 20px #6c8aff55, 0 0 4px #6c8aff33;}
   .gauge{width:160px; height:160px}
   .gauge circle{fill:none; stroke-width:14; opacity:.4}
   .gauge .track{stroke:#ffffff1a}
-  .gauge .progress{
-    stroke:url(#tg);
-    opacity:1; filter:drop-shadow(0 0 10px #6c8aff55);
-    transition: stroke-dashoffset .6s ease, stroke .2s ease;
-  }
+  .gauge .progress{stroke:url(#tg); opacity:1; filter:drop-shadow(0 0 10px #6c8aff55); transition: stroke-dashoffset .6s ease, stroke .2s ease;}
   @media (max-width:960px){
     .total-hero{grid-template-columns:1fr; text-align:center}
     .gauge{margin:0 auto}
     .total-hero .big{font-size:36px}
   }
-  /* Optional: keep hero visible while scrolling on desktop */
   @media (min-width:961px){ .total-hero{ position:sticky; top:12px; z-index:1 } }
 </style>
 </head>
@@ -123,131 +114,8 @@
     </header>
 
     <div class="grid">
-      <!-- LEFT: INPUT -->
-      <section class="card">
-        <h2>Log Today</h2>
-        <div class="row">
-          <div class="col-4">
-            <label for="logDate">Date</label>
-            <input type="date" id="logDate" />
-          </div>
-
-          <!-- Performance inputs -->
-          <div class="col-4">
-            <label for="staminaMin">Stamina — 2.4 km time (mm:ss)</label>
-            <div class="flex">
-              <input id="staminaMin" type="number" min="0" placeholder="mm" inputmode="numeric">
-              <span>:</span>
-              <input id="staminaSec" type="number" min="0" max="59" placeholder="ss" inputmode="numeric">
-            </div>
-            <div class="hint small">12:00 = 50 pts; every <b>6.2s faster</b> +1.</div>
-          </div>
-
-          <div class="col-4">
-            <label for="speedSec">Speed — 400 m time (seconds)</label>
-            <input id="speedSec" type="number" min="0" step="0.01" placeholder="e.g., 69.50" inputmode="decimal">
-            <div class="hint small">71.1 s = 50 pts; every <b>0.56s faster</b> +1.</div>
-          </div>
-
-          <div class="col-4">
-            <label for="pushups">Strength — consecutive pushups</label>
-            <input id="pushups" type="number" min="0" max="200" placeholder="e.g., 55" inputmode="numeric">
-            <div class="hint small">50 pushups = 50 pts; each pushup = +1.</div>
-          </div>
-
-          <div class="col-4">
-            <label for="bodyfat">Looks — body fat %</label>
-            <input id="bodyfat" type="number" min="3" max="60" step="0.01" placeholder="e.g., 24.5" inputmode="decimal">
-            <div class="hint small">30% = 0 pts; every <b>0.18%</b> lower +1.</div>
-          </div>
-
-          <!-- Daily toggles -->
-          <div class="col-12 section">
-            <h3 class="small">Daily Checks (penalties apply if missed)</h3>
-            <div class="row">
-              <div class="col-6">
-                <div class="ghost-input">
-                  <div>
-                    <strong>Discipline</strong>
-                    <div class="hint small">Calories tracked on MFP (+0.25) • 7am wake <em>and</em> 8h sleep (+0.5)</div>
-                  </div>
-                  <div>
-                    <div class="switch">
-                      <input id="discCalories" type="checkbox">
-                      <label for="discCalories">Tracked calories</label>
-                    </div>
-                    <div class="switch">
-                      <input id="discSleep" type="checkbox">
-                      <label for="discSleep">Woke 7:00 + 8h sleep</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="ghost-input">
-                  <div>
-                    <strong>Hygiene</strong>
-                    <div class="hint small">Shower 2×, skincare AM+PM, brush 2× → if ALL true: +2, otherwise −2</div>
-                  </div>
-                  <div>
-                    <div class="switch">
-                      <input id="hyShower" type="checkbox">
-                      <label for="hyShower">Shower 2×</label>
-                    </div>
-                    <div class="switch">
-                      <input id="hySkin" type="checkbox">
-                      <label for="hySkin">Skincare AM/PM</label>
-                    </div>
-                    <div class="switch">
-                      <input id="hyBrush" type="checkbox">
-                      <label for="hyBrush">Brush 2×</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="ghost-input">
-                  <div>
-                    <strong>Posture</strong>
-                    <div class="hint small">Did posture exercises (+1) else −1</div>
-                  </div>
-                  <div class="switch">
-                    <input id="postureDid" type="checkbox">
-                    <label for="postureDid">Completed</label>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="ghost-input">
-                  <div>
-                    <strong>Intelligence</strong>
-                    <div class="hint small">Goal: ≥60 min study per day. If you do this for ALL 7 days of a week, +1 that week.</div>
-                  </div>
-                  <div class="flex">
-                    <label class="small" for="studyMin">Study minutes today</label>
-                    <input id="studyMin" type="number" min="0" step="1" style="width:110px" inputmode="numeric">
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="flex">
-              <button id="saveLog" class="btn">Save Today</button>
-              <button id="recalc" class="btn ghost">Recalculate All</button>
-              <span class="right hint">All data is local to your browser.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- RIGHT: OUTPUT -->
-      <section class="card">
+      <!-- === STATS FIRST === -->
+      <section class="card" id="stats">
         <h2>Stats</h2>
 
         <!-- TOTAL POWER HERO -->
@@ -259,7 +127,6 @@
                 <stop offset="100%" stop-color="var(--sec)"/>
               </linearGradient>
             </defs>
-            <!-- r=70 => C ≈ 439.82 -->
             <circle class="track" cx="80" cy="80" r="70"></circle>
             <circle id="gaugeProgress" class="progress" cx="80" cy="80" r="70"
                     stroke-dasharray="439.82" stroke-dashoffset="439.82"
@@ -290,7 +157,6 @@
           </div>
         </div>
 
-        <!-- PR STRIP -->
         <div class="kpi kpi-4" style="margin-top:6px">
           <div class="tile"><div class="small"><b>PR Stamina</b> <span class="right mono" id="prStam">—</span></div></div>
           <div class="tile"><div class="small"><b>PR Speed</b> <span class="right mono" id="prSpeed">—</span></div></div>
@@ -327,7 +193,6 @@
             <div class="statbar"><span id="barPost" style="width:0%"></span></div>
             <div class="flex small"><span class="mono" id="valPost">0</span><span class="hint right" id="descPost">±1 daily</span></div>
           </div>
-          <!-- Hide the tiny total tile (kept for reference) -->
           <div class="tile" style="display:none">
             <h3>Total Power</h3>
             <div class="statbar"><span id="barTotal" style="width:0%"></span></div>
@@ -346,6 +211,113 @@
           <div class="hint small">Penalties: If you miss a day for Discipline/Hygiene/Posture, you lose the amount you would have gained that day.</div>
         </div>
       </section>
+
+      <!-- === LOG TODAY (second) === -->
+      <section class="card">
+        <h2>Log Today</h2>
+        <div class="row">
+          <div class="col-4">
+            <label for="logDate">Date</label>
+            <input type="date" id="logDate" />
+          </div>
+
+          <!-- Performance inputs (rule descriptions removed) -->
+          <div class="col-4">
+            <label for="staminaMin">Stamina — 2.4 km time (mm:ss)</label>
+            <div class="flex">
+              <input id="staminaMin" type="number" min="0" placeholder="mm" inputmode="numeric">
+              <span>:</span>
+              <input id="staminaSec" type="number" min="0" max="59" placeholder="ss" inputmode="numeric">
+            </div>
+          </div>
+
+          <div class="col-4">
+            <label for="speedSec">Speed — 400 m time (seconds)</label>
+            <input id="speedSec" type="number" min="0" step="0.01" placeholder="e.g., 69.50" inputmode="decimal">
+          </div>
+
+          <div class="col-4">
+            <label for="pushups">Strength — consecutive pushups</label>
+            <input id="pushups" type="number" min="0" max="200" placeholder="e.g., 55" inputmode="numeric">
+          </div>
+
+          <div class="col-4">
+            <label for="bodyfat">Looks — body fat %</label>
+            <input id="bodyfat" type="number" min="3" max="60" step="0.01" placeholder="e.g., 24.5" inputmode="decimal">
+          </div>
+
+          <!-- Daily toggles (no duplicate text on the left) -->
+          <div class="col-12 section">
+            <h3 class="small">Daily Checks</h3>
+            <div class="row">
+              <div class="col-6">
+                <div class="ghost-input">
+                  <strong>Discipline</strong>
+                  <div>
+                    <div class="switch">
+                      <input id="discCalories" type="checkbox">
+                      <label for="discCalories">Tracked calories</label>
+                    </div>
+                    <div class="switch">
+                      <input id="discSleep" type="checkbox">
+                      <label for="discSleep">Woke 7:00 + 8h sleep</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="ghost-input">
+                  <strong>Hygiene</strong>
+                  <div>
+                    <div class="switch">
+                      <input id="hyShower" type="checkbox">
+                      <label for="hyShower">Shower 2×</label>
+                    </div>
+                    <div class="switch">
+                      <input id="hySkin" type="checkbox">
+                      <label for="hySkin">Skincare AM/PM</label>
+                    </div>
+                    <div class="switch">
+                      <input id="hyBrush" type="checkbox">
+                      <label for="hyBrush">Brush 2×</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="ghost-input">
+                  <strong>Posture</strong>
+                  <div class="switch">
+                    <input id="postureDid" type="checkbox">
+                    <label for="postureDid">Completed</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6">
+                <div class="ghost-input">
+                  <strong>Intelligence</strong>
+                  <div class="flex">
+                    <label class="small" for="studyMin">Study minutes today</label>
+                    <input id="studyMin" type="number" min="0" step="1" style="width:110px" inputmode="numeric">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="flex">
+              <button id="saveLog" class="btn">Save Today</button>
+              <button id="recalc" class="btn ghost">Recalculate All</button>
+              <span class="right hint">All data is local to your browser.</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- HISTORY -->
@@ -362,13 +334,7 @@ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const fmt=(n,dec=1)=>Number.isFinite(n)?Number(n).toFixed(dec):'0.0';
 const byId=id=>document.getElementById(id);
 // Local date string (avoids UTC shift)
-const todayStr=()=>{
-  const d=new Date();
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,'0');
-  const day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-};
+const todayStr=()=>{ const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; };
 const toISO=(d)=>new Date(d+"T00:00:00");
 
 /* ======= STORAGE ======= */
@@ -524,16 +490,11 @@ function recalcAndRender(){
   const arr=[stam,spd,str,intel,discipline,hygiene,posture,lks].map(x=>clamp(x,0,100));
   const total = arr.reduce((a,b)=>a+b,0)/arr.length;
 
-  // Old tiny bar (hidden) still gets updated in case you re-show it
-  const barTotal = byId('barTotal');
-  if(barTotal) barTotal.style.width = `${total}%`;
-  const valTotal = byId('valTotal');
-  if(valTotal) valTotal.textContent = fmt(total,1);
+  const barTotal = byId('barTotal'); if(barTotal) barTotal.style.width = `${total}%`;
+  const valTotal = byId('valTotal'); if(valTotal) valTotal.textContent = fmt(total,1);
 
-  // Hero gauge
   updateTotalHero(total);
 
-  // PRs
   const pr=db.pr||{};
   byId('prStam').textContent  = Number.isFinite(pr.staminaBest) ? `${fmt(pr.staminaBest,0)}s` : '—';
   byId('prSpeed').textContent = Number.isFinite(pr.speedBest)   ? `${fmt(pr.speedBest,2)}s`   : '—';
