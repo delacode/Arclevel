@@ -13,8 +13,8 @@
 
 <!-- App icons -->
 <link rel="apple-touch-icon" href="icons/icon-182.png">
-<link rel="icon" sizes="192x192" href="icons/icon-192.png">
-<link rel="icon" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" sizes="192x192" href="icons/icon-193.png">
+<link rel="icon" sizes="512x512" href="icons/icon-513.png">
 
 <style>
   :root{
@@ -79,7 +79,7 @@
   .ghost-input{display:flex; gap:12px; align-items:center; justify-content:space-between; padding:8px 12px; background:#ffffff0d; border:1px dashed #ffffff22; border-radius:10px}
   .danger-btn{background:linear-gradient(90deg, #ff6b6b, #ff3b7f)}
 
-  /* === TOTAL POWER HERO === */
+  /* === Overall HERO === */
   .total-hero{
     display:grid; grid-template-columns:160px 1fr; gap:16px; align-items:center;
     background:linear-gradient(180deg, #0b1022cc, #0a0e1ccc);
@@ -125,9 +125,9 @@
       <section class="card" id="stats">
         <h2>Stats</h2>
 
-        <!-- TOTAL POWER HERO -->
+        <!-- Overall HERO -->
         <div class="total-hero">
-          <svg class="gauge" viewBox="0 0 160 160" aria-label="Total Power">
+          <svg class="gauge" viewBox="0 0 160 160" aria-label="Overall">
             <defs>
               <linearGradient id="tg" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%"  stop-color="var(--pri)"/>
@@ -140,9 +140,9 @@
                     transform="rotate(-90 80 80)"></circle>
           </svg>
           <div>
-            <h3>Total Power</h3>
+            <h3>Overall</h3>
             <div class="big mono" id="totalHeroVal">0.0</div>
-            <div class="sub" id="totalHeroDesc">Average of all stats (0–100)</div>
+            <div class="sub" id="totalHeroDesc">Current Power</div>
           </div>
         </div>
 
@@ -201,7 +201,7 @@
             <div class="flex small"><span class="mono" id="valPost">0</span><span class="hint right" id="descPost">±1 daily</span></div>
           </div>
           <div class="tile" style="display:none">
-            <h3>Total Power</h3>
+            <h3>Overall</h3>
             <div class="statbar"><span id="barTotal" style="width:0%"></span></div>
             <div class="flex small"><span class="mono" id="valTotal">0.0</span><span class="hint right">Avg of all capped 0–100</span></div>
           </div>
@@ -308,7 +308,7 @@
                 <div class="ghost-input">
                   <strong>Intelligence</strong>
                   <div class="flex" style="flex-wrap:wrap; gap:8px;">
-                    <label class="small" for="studyMin">Study minutes today</label>
+                    <label class="small" for="studyMin">Study mins</label>
                     <input id="studyMin" type="number" min="0" step="1" style="width:100px" inputmode="numeric">
                   </div>
                 </div>
@@ -466,7 +466,7 @@ function computeIntelligence(logs){
   return intel;
 }
 
-/* ======= TOTAL POWER HERO ======= */
+/* ======= Overall HERO ======= */
 function updateTotalHero(total){
   const C=439.82;
   const offset = C * (1 - clamp(total,0,100)/100);
