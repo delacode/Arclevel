@@ -7,7 +7,7 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-180.png',   // iOS touch icon
+  './icons/icon-181.png',   // iOS touch icon
   './icons/icon-192.png',   // PWA required
   './icons/icon-512.png'    // PWA required
 ];
