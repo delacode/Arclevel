@@ -11,10 +11,11 @@
 <meta name="theme-color" content="#0a0b12">
 <link rel="manifest" href="manifest.json">
 
-<!-- App icons (put files in ./icons/) -->
+<!-- App icons -->
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" sizes="512x512" href="icons/icon-512.png">
+
 <style>
   :root{
     --bg:#0a0b12; --panel:#0f1322; --panel-2:#0c1020; --ink:#e9eeff; --muted:#9aa6c4;
@@ -77,6 +78,35 @@
   .section{margin-top:12px; padding-top:12px; border-top:1px dashed #ffffff22}
   .ghost-input{display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 12px; background:#ffffff0d; border:1px dashed #ffffff22; border-radius:10px}
   .danger-btn{background:linear-gradient(90deg, #ff6b6b, #ff3b7f)}
+
+  /* === TOTAL POWER HERO === */
+  .total-hero{
+    display:grid; grid-template-columns:160px 1fr; gap:16px; align-items:center;
+    background:linear-gradient(180deg, #0b1022cc, #0a0e1ccc);
+    border:1px solid #ffffff1a; border-radius:16px; padding:16px; margin-bottom:14px;
+    box-shadow:0 20px 50px #0009, inset 0 0 0 1px #ffffff12;
+  }
+  .total-hero h3{margin:0; font-size:1.05rem; color:#cfe1ff; letter-spacing:.02em}
+  .total-hero .big{
+    font-size:42px; line-height:1; font-weight:800; letter-spacing:.5px;
+    text-shadow:0 0 20px #6c8aff55, 0 0 4px #6c8aff33;
+  }
+  .total-hero .sub{color:var(--muted); margin-top:6px}
+  .gauge{width:160px; height:160px}
+  .gauge circle{fill:none; stroke-width:14; opacity:.4}
+  .gauge .track{stroke:#ffffff1a}
+  .gauge .progress{
+    stroke:url(#tg);
+    opacity:1; filter:drop-shadow(0 0 10px #6c8aff55);
+    transition: stroke-dashoffset .6s ease, stroke .2s ease;
+  }
+  @media (max-width:960px){
+    .total-hero{grid-template-columns:1fr; text-align:center}
+    .gauge{margin:0 auto}
+    .total-hero .big{font-size:36px}
+  }
+  /* Optional: keep hero visible while scrolling on desktop */
+  @media (min-width:961px){ .total-hero{ position:sticky; top:12px; z-index:1 } }
 </style>
 </head>
 <body>
@@ -102,7 +132,7 @@
             <input type="date" id="logDate" />
           </div>
 
-          <!-- Performance inputs (point-in-time, not daily) -->
+          <!-- Performance inputs -->
           <div class="col-4">
             <label for="staminaMin">Stamina — 2.4 km time (mm:ss)</label>
             <div class="flex">
@@ -219,6 +249,29 @@
       <!-- RIGHT: OUTPUT -->
       <section class="card">
         <h2>Stats</h2>
+
+        <!-- TOTAL POWER HERO -->
+        <div class="total-hero">
+          <svg class="gauge" viewBox="0 0 160 160" aria-label="Total Power">
+            <defs>
+              <linearGradient id="tg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"  stop-color="var(--pri)"/>
+                <stop offset="100%" stop-color="var(--sec)"/>
+              </linearGradient>
+            </defs>
+            <!-- r=70 => C ≈ 439.82 -->
+            <circle class="track" cx="80" cy="80" r="70"></circle>
+            <circle id="gaugeProgress" class="progress" cx="80" cy="80" r="70"
+                    stroke-dasharray="439.82" stroke-dashoffset="439.82"
+                    transform="rotate(-90 80 80)"></circle>
+          </svg>
+          <div>
+            <h3>Total Power</h3>
+            <div class="big mono" id="totalHeroVal">0.0</div>
+            <div class="sub" id="totalHeroDesc">Average of all stats (0–100)</div>
+          </div>
+        </div>
+
         <div class="kpi">
           <div class="tile">
             <h3>Stamina</h3>
@@ -274,7 +327,8 @@
             <div class="statbar"><span id="barPost" style="width:0%"></span></div>
             <div class="flex small"><span class="mono" id="valPost">0</span><span class="hint right" id="descPost">±1 daily</span></div>
           </div>
-          <div class="tile">
+          <!-- Hide the tiny total tile (kept for reference) -->
+          <div class="tile" style="display:none">
             <h3>Total Power</h3>
             <div class="statbar"><span id="barTotal" style="width:0%"></span></div>
             <div class="flex small"><span class="mono" id="valTotal">0.0</span><span class="hint right">Avg of all capped 0–100</span></div>
@@ -320,23 +374,9 @@ const toISO=(d)=>new Date(d+"T00:00:00");
 /* ======= STORAGE ======= */
 const storeKey="arclevel_v1";
 let db = JSON.parse(localStorage.getItem(storeKey)||'{"logs":{},"perf":{}}');
-// Ensure PR structure exists for older saves
 if(!db.pr){ db.pr = { staminaBest:null, speedBest:null, pushupsBest:null, bodyfatBest:null }; }
 
-/* db structure:
-{
-  perf:{ staminaSec: null, speed400: null, pushups:null, bodyfat:null },
-  pr:  { staminaBest:null, speedBest:null, pushupsBest:null, bodyfatBest:null },
-  logs:{
-    "YYYY-MM-DD":{
-       discCalories:true/false, discSleep:true/false,
-       hyShower:true/false, hySkin:true/false, hyBrush:true/false,
-       postureDid:true/false, studyMin:number
-    }
-  }
-}
-*/
-
+/* ======= SAVE ======= */
 function save(){
   localStorage.setItem(storeKey, JSON.stringify(db));
   byId('saveStatus').textContent='Saved ✔';
@@ -344,10 +384,7 @@ function save(){
 }
 
 /* ======= INPUT INIT ======= */
-function initDate(){
-  const el=byId('logDate');
-  el.value = todayStr();
-}
+function initDate(){ byId('logDate').value = todayStr(); }
 
 function loadInputsFromPerf(){
   const p=db.perf||{};
@@ -371,7 +408,6 @@ function readPerfFromInputs(){
 
 /* ======= SAVE TODAY LOG ======= */
 byId('saveLog').addEventListener('click', ()=>{
-  // perf (overwrite with latest known values as you enter them)
   const perf=readPerfFromInputs();
   db.perf = {
     staminaSec: Number.isFinite(perf.staminaSec)&&perf.staminaSec>0 ? perf.staminaSec : (db.perf?.staminaSec ?? null),
@@ -380,22 +416,13 @@ byId('saveLog').addEventListener('click', ()=>{
     bodyfat:   Number.isFinite(perf.bodyfat)  ? perf.bodyfat  : (db.perf?.bodyfat ?? null),
   };
 
-  // Update PRs (fastest/lower is better for times/BF; higher is better for reps)
-  const p = db.perf;
-  if(Number.isFinite(p.staminaSec) && p.staminaSec>0){
-    db.pr.staminaBest = (db.pr.staminaBest==null) ? p.staminaSec : Math.min(db.pr.staminaBest, p.staminaSec);
-  }
-  if(Number.isFinite(p.speed400) && p.speed400>0){
-    db.pr.speedBest = (db.pr.speedBest==null) ? p.speed400 : Math.min(db.pr.speedBest, p.speed400);
-  }
-  if(Number.isFinite(p.pushups) && p.pushups>0){
-    db.pr.pushupsBest = (db.pr.pushupsBest==null) ? p.pushups : Math.max(db.pr.pushupsBest, p.pushups);
-  }
-  if(Number.isFinite(p.bodyfat) && p.bodyfat>0){
-    db.pr.bodyfatBest = (db.pr.bodyfatBest==null) ? p.bodyfat : Math.min(db.pr.bodyfatBest, p.bodyfat);
-  }
+  // Update PRs
+  const p=db.perf;
+  if(Number.isFinite(p.staminaSec) && p.staminaSec>0) db.pr.staminaBest = (db.pr.staminaBest==null) ? p.staminaSec : Math.min(db.pr.staminaBest, p.staminaSec);
+  if(Number.isFinite(p.speed400) && p.speed400>0)     db.pr.speedBest   = (db.pr.speedBest==null)   ? p.speed400   : Math.min(db.pr.speedBest, p.speed400);
+  if(Number.isFinite(p.pushups) && p.pushups>0)       db.pr.pushupsBest = (db.pr.pushupsBest==null) ? p.pushups    : Math.max(db.pr.pushupsBest, p.pushups);
+  if(Number.isFinite(p.bodyfat) && p.bodyfat>0)       db.pr.bodyfatBest = (db.pr.bodyfatBest==null) ? p.bodyfat    : Math.min(db.pr.bodyfatBest, p.bodyfat);
 
-  // daily log
   const d=byId('logDate').value || todayStr();
   db.logs[d] = {
     discCalories: !!byId('discCalories').checked,
@@ -408,47 +435,21 @@ byId('saveLog').addEventListener('click', ()=>{
   };
   save();
   recalcAndRender();
-  flashRow(d);
 });
 
-/* ======= MAPPINGS (YOUR RULES) ======= */
-// Stamina: 12:00 (720s) = 50; every 6.2s faster +1
-function staminaPoints(sec){
-  if(!Number.isFinite(sec) || sec<=0) return 0;
-  const base=50 + ((720 - sec) / 6.2);
-  return clamp(base, 0, 100);
-}
-// Speed: 400m -> 71.1s = 50; every 0.56s faster +1
-function speedPoints(sec400){
-  if(!Number.isFinite(sec400) || sec400<=0) return 0;
-  const base=50 + ((71.1 - sec400) / 0.56);
-  return clamp(base, 0, 100);
-}
-// Strength: pushups -> 50 = 50; +1 per rep
-function strengthPoints(pushups){
-  if(!Number.isFinite(pushups) || pushups<=0) return 0;
-  return clamp(pushups, 0, 100);
-}
-// Looks: 30% = 0; every 0.18% lower +1
-function looksPoints(bodyfat){
-  if(!Number.isFinite(bodyfat) || bodyfat<=0) return 0;
-  const pts = (30 - bodyfat) / 0.18;
-  return clamp(pts, 0, 100);
-}
+/* ======= MAPPINGS ======= */
+function staminaPoints(sec){ if(!Number.isFinite(sec)||sec<=0) return 0; return clamp(50 + ((720 - sec)/6.2), 0, 100); }
+function speedPoints(sec400){ if(!Number.isFinite(sec400)||sec400<=0) return 0; return clamp(50 + ((71.1 - sec400)/0.56), 0, 100); }
+function strengthPoints(pushups){ if(!Number.isFinite(pushups)||pushups<=0) return 0; return clamp(pushups, 0, 100); }
+function looksPoints(bodyfat){ if(!Number.isFinite(bodyfat)||bodyfat<=0) return 0; return clamp((30 - bodyfat)/0.18, 0, 100); }
 
-/* ======= DAILY ACCUMULATION WITH PENALTIES ======= 
-   Discipline: +0.25 if calories tracked; +0.5 if wake7+8h; else negative of each missed.
-   Hygiene: if ALL three true → +2; else → −2
-   Posture: +1 if done; else −1
-   Intelligence: +1 per ISO week where ALL 7 days have studyMin >= 60.
-*/
+/* ======= DAILY ACCUMULATION ======= */
 function sumDailyStats(logs){
   let discipline=0, hygiene=0, posture=0;
-
   for(const day in logs){
     const L=logs[day];
     discipline += (L.discCalories ? +0.25 : -0.25);
-    discipline += (L.discSleep ? +0.5  : -0.5);
+    discipline += (L.discSleep ? +0.5 : -0.5);
     const allH = !!(L.hyShower && L.hySkin && L.hyBrush);
     hygiene += allH ? +2 : -2;
     posture += (L.postureDid ? +1 : -1);
@@ -456,53 +457,60 @@ function sumDailyStats(logs){
   return {discipline, hygiene, posture};
 }
 
-// ISO week utilities
+/* ======= INTELLIGENCE (ISO weeks) ======= */
 function isoWeekKey(dateStr){
-  const d = toISO(dateStr); // local midnight for that date
-  const dayNum = (d.getUTCDay() + 6) % 7; // Mon=0..Sun=6
-  const thursday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dayNum + 3));
-  const week1 = new Date(Date.UTC(thursday.getUTCFullYear(),0,4));
-  const weekNum = 1 + Math.round(((thursday - week1) / 86400000 - 3 + ((week1.getUTCDay()+6)%7)) / 7);
+  const d=toISO(dateStr);
+  const dayNum=(d.getUTCDay()+6)%7; // Mon=0
+  const thursday=new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()-dayNum+3));
+  const week1=new Date(Date.UTC(thursday.getUTCFullYear(),0,4));
+  const weekNum=1+Math.round(((thursday-week1)/86400000 -3 + ((week1.getUTCDay()+6)%7))/7);
   return `${thursday.getUTCFullYear()}-W${String(weekNum).padStart(2,'0')}`;
 }
-
 function computeIntelligence(logs){
-  const weeks = {};
+  const weeks={};
   for(const day in logs){
-    const key = isoWeekKey(day);
-    if(!weeks[key]) weeks[key] = {};
-    weeks[key][day] = logs[day].studyMin || 0;
+    const key=isoWeekKey(day);
+    if(!weeks[key]) weeks[key]={};
+    weeks[key][day]=logs[day].studyMin||0;
   }
   let intel=0;
   for(const w in weeks){
-    const days = weeks[w];
-    const [yearPart, wkPart] = w.split("-W");
-    const year = Number(yearPart), wk = Number(wkPart);
-    const simple = new Date(Date.UTC(year,0,4 + (wk-1)*7));
-    const dow = (simple.getUTCDay()+6)%7;
-    const monday = new Date(simple); monday.setUTCDate(simple.getUTCDate() - dow);
+    const [yearPart,wkPart]=w.split('-W');
+    const year=Number(yearPart), wk=Number(wkPart);
+    const simple=new Date(Date.UTC(year,0,4+(wk-1)*7));
+    const dow=(simple.getUTCDay()+6)%7;
+    const monday=new Date(simple); monday.setUTCDate(simple.getUTCDate()-dow);
     let allSeven=true;
     for(let i=0;i<7;i++){
-      const d = new Date(monday); d.setUTCDate(monday.getUTCDate()+i);
-      const ds = d.toISOString().slice(0,10);
-      const mins = days[ds] ?? 0;
-      if(mins < 60){ allSeven=false; break; }
+      const d=new Date(monday); d.setUTCDate(monday.getUTCDate()+i);
+      const ds=d.toISOString().slice(0,10);
+      const mins=weeks[w][ds]??0;
+      if(mins<60){ allSeven=false; break; }
     }
-    if(allSeven) intel += 1;
+    if(allSeven) intel+=1;
   }
   return intel;
+}
+
+/* ======= TOTAL POWER HERO ======= */
+function updateTotalHero(total){
+  const C=439.82;
+  const offset = C * (1 - clamp(total,0,100)/100);
+  const gp = byId('gaugeProgress');
+  if(gp) gp.setAttribute('stroke-dashoffset', String(offset));
+  byId('totalHeroVal').textContent = fmt(total,1);
 }
 
 /* ======= RECALC + RENDER ======= */
 function recalcAndRender(){
   const p=db.perf||{};
-  const stam = staminaPoints(p.staminaSec);
-  const spd  = speedPoints(p.speed400);
-  const str  = strengthPoints(p.pushups);
-  const lks  = looksPoints(p.bodyfat);
+  const stam=staminaPoints(p.staminaSec);
+  const spd =speedPoints(p.speed400);
+  const str =strengthPoints(p.pushups);
+  const lks =looksPoints(p.bodyfat);
 
-  const {discipline, hygiene, posture} = sumDailyStats(db.logs||{});
-  const intel = computeIntelligence(db.logs||{});
+  const {discipline,hygiene,posture}=sumDailyStats(db.logs||{});
+  const intel=computeIntelligence(db.logs||{});
 
   setStat('Stamina', stam, `${fmt(p.staminaSec??0,0)}s`);
   setStat('Speed', spd, `${fmt(p.speed400??0,2)}s`);
@@ -515,10 +523,17 @@ function recalcAndRender(){
 
   const arr=[stam,spd,str,intel,discipline,hygiene,posture,lks].map(x=>clamp(x,0,100));
   const total = arr.reduce((a,b)=>a+b,0)/arr.length;
-  byId('barTotal').style.width = `${total}%`;
-  byId('valTotal').textContent = fmt(total,1);
 
-  // Render PRs
+  // Old tiny bar (hidden) still gets updated in case you re-show it
+  const barTotal = byId('barTotal');
+  if(barTotal) barTotal.style.width = `${total}%`;
+  const valTotal = byId('valTotal');
+  if(valTotal) valTotal.textContent = fmt(total,1);
+
+  // Hero gauge
+  updateTotalHero(total);
+
+  // PRs
   const pr=db.pr||{};
   byId('prStam').textContent  = Number.isFinite(pr.staminaBest) ? `${fmt(pr.staminaBest,0)}s` : '—';
   byId('prSpeed').textContent = Number.isFinite(pr.speedBest)   ? `${fmt(pr.speedBest,2)}s`   : '—';
@@ -545,7 +560,7 @@ function setStat(name,val,desc){
   byId(descEl).textContent = desc;
 }
 
-/* ======= HISTORY RENDER ======= */
+/* ======= HISTORY ======= */
 function renderHistory(){
   const container = byId('history');
   const entries = Object.entries(db.logs).sort((a,b)=> a[0]<b[0]?-1:1);
@@ -572,9 +587,6 @@ function renderHistory(){
     `;
   }
   container.innerHTML = html;
-}
-function flashRow(dateStr){
-  // (simple UX ping — can be enhanced if desired)
 }
 
 /* ======= IMPORT / EXPORT / WIPE ======= */
