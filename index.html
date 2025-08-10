@@ -114,7 +114,7 @@
         <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>ARC//LEVEL</h1>
-          <div class="sub">Solo-Leveling-style stats. Daily penalties. Weekly grind. Local save.</div>
+          <div class="sub">Measure and improve personal performance of life. Daily tracking, weekly progress and local save</div>
         </div>
       </div>
       <div class="pill" aria-live="polite"><span>🗄️</span><span id="saveStatus">Auto-saved</span></div>
@@ -173,7 +173,7 @@
 
         <div class="kpi" style="margin-top:10px">
           <div class="tile">
-            <h3>Intelligence</h3>
+            <h3>Mind</h3>
             <div class="statbar"><span id="barIntel" style="width:0%"></span></div>
             <div class="flex small"><span class="mono" id="valIntel">0</span><span class="hint right" id="descIntel">+1 per full week</span></div>
           </div>
@@ -303,10 +303,10 @@
                 </div>
               </div>
 
-              <!-- UPDATED: Intelligence (no goal text, wrapped so it doesn't overflow) -->
+              <!-- UPDATED: Mind (no goal text, wrapped so it doesn't overflow) -->
               <div class="col-6">
                 <div class="ghost-input">
-                  <strong>Intelligence</strong>
+                  <strong>Mind</strong>
                   <div class="flex" style="flex-wrap:wrap; gap:8px;">
                     <label class="small" for="studyMin">Study mins</label>
                     <input id="studyMin" type="number" min="0" step="1" style="width:100px" inputmode="numeric">
@@ -431,7 +431,7 @@ function sumDailyStats(logs){
   return {discipline, hygiene, posture};
 }
 
-/* ======= INTELLIGENCE (ISO weeks) ======= */
+/* ======= Mind (ISO weeks) ======= */
 function isoWeekKey(dateStr){
   const d=toISO(dateStr);
   const dayNum=(d.getUTCDay()+6)%7; // Mon=0
@@ -440,7 +440,7 @@ function isoWeekKey(dateStr){
   const weekNum=1+Math.round(((thursday-week1)/86400000 -3 + ((week1.getUTCDay()+6)%7))/7);
   return `${thursday.getUTCFullYear()}-W${String(weekNum).padStart(2,'0')}`;
 }
-function computeIntelligence(logs){
+function computeMind(logs){
   const weeks={};
   for(const day in logs){
     const key=isoWeekKey(day);
@@ -484,7 +484,7 @@ function recalcAndRender(){
   const lks =looksPoints(p.bodyfat);
 
   const {discipline,hygiene,posture}=sumDailyStats(db.logs||{});
-  const intel=computeIntelligence(db.logs||{});
+  const intel=computeMind(db.logs||{});
 
   setStat('Stamina', stam, `${fmt(p.staminaSec??0,0)}s`);
   setStat('Speed', spd, `${fmt(p.speed400??0,2)}s`);
@@ -493,7 +493,7 @@ function recalcAndRender(){
   setStat('Discipline', clamp(discipline,0,100), `${discipline>=0?'+':''}${discipline.toFixed(2)} total`);
   setStat('Hygiene', clamp(hygiene,0,100), `${hygiene>=0?'+':''}${hygiene.toFixed(0)} total`);
   setStat('Posture', clamp(posture,0,100), `${posture>=0?'+':''}${posture.toFixed(0)} total`);
-  setStat('Intelligence', clamp(intel,0,100), `${intel} full weeks`);
+  setStat('Mind', clamp(intel,0,100), `${intel} full weeks`);
 
   const arr=[stam,spd,str,intel,discipline,hygiene,posture,lks].map(x=>clamp(x,0,100));
   const total = arr.reduce((a,b)=>a+b,0)/arr.length;
@@ -517,7 +517,7 @@ function setStat(name,val,desc){
     'Stamina':['barStamina','valStamina','descStamina'],
     'Speed':['barSpeed','valSpeed','descSpeed'],
     'Strength':['barStrength','valStrength','descStrength'],
-    'Intelligence':['barIntel','valIntel','descIntel'],
+    'Mind':['barIntel','valIntel','descIntel'],
     'Discipline':['barDisc','valDisc','descDisc'],
     'Looks':['barLooks','valLooks','descLooks'],
     'Hygiene':['barHyg','valHyg','descHyg'],
@@ -525,7 +525,7 @@ function setStat(name,val,desc){
   };
   const [bar,valEl,descEl]=map[name];
   byId(bar).style.width = `${clamp(val,0,100)}%`;
-  byId(valEl).textContent = (name==='Discipline') ? fmt(val,2) : (name==='Intelligence' ? fmt(val,0) : fmt(val,1));
+  byId(valEl).textContent = (name==='Discipline') ? fmt(val,2) : (name==='Mind' ? fmt(val,0) : fmt(val,1));
   byId(descEl).textContent = desc;
 }
 
