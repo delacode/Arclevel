@@ -1,27 +1,36 @@
-const CACHE = 'arclevel-v1';
+// sw.js
+// Basic offline cache for ARC//LEVEL
+// Bump the CACHE version any time you change ASSETS so clients update.
+const CACHE = 'arclevel-v3';
+
 const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/icon-180.png"
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-180.png',   // iOS touch icon
+  './icons/icon-192.png',   // PWA required
+  './icons/icon-512.png'    // PWA required
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+// Install: pre-cache core assets
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE).then((c) => c.addAll(ASSETS))
+  );
 });
 
-self.addEventListener('activate', e => {
+// Activate: clean old caches
+self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     )
   );
 });
 
-self.addEventListener('fetch', e => {
+// Fetch: cache-first, then network fallback
+self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    caches.match(e.request).then((r) => r || fetch(e.request))
   );
 });
