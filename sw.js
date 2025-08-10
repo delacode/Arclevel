@@ -8,8 +8,8 @@ const ASSETS = [
   './index.html',
   './manifest.json',
   './icons/icon-182.png',   // iOS touch icon
-  './icons/icon-192.png',   // PWA required
-  './icons/icon-512.png'    // PWA required
+  './icons/icon-193.png',   // PWA required
+  './icons/icon-513.png'    // PWA required
 ];
 
 // Install: pre-cache core assets
