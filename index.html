@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ARC//LEVEL — Dark Futuristic Leveling</<!-- iOS fullscreen + status bar -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ARC//LEVEL — Dark Futuristic Leveling</title>
+<!-- iOS fullscreen + status bar -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ARC//LEVEL">
 <meta name="theme-color" content="#0a0b12">
+<link rel="manifest" href="manifest.json">
 
 <!-- App icons (put files in ./icons/) -->
-<link rel="apple-touch-icon" href="icons/icon-180.png">   <!-- iOS home screen -->
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" sizes="512x512" href="icons/icon-512.png">
 <style>
@@ -60,6 +62,7 @@
   .statbar{height:10px; background:#ffffff10; border-radius:999px; overflow:hidden}
   .statbar>span{display:block; height:100%; background:linear-gradient(90deg, var(--pri), var(--sec))}
   .kpi{display:grid; grid-template-columns: repeat(3,1fr); gap:10px}
+  .kpi.kpi-4{grid-template-columns: repeat(4,1fr)}
   .kpi .tile{background:#0a0e1c; border-radius:12px; padding:12px; border:1px solid #ffffff14}
   .tile h3{margin:0 0 8px; font-size:.9rem; color:#c8d2ff}
   .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
@@ -80,13 +83,13 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo"></div>
+        <div class="logo" aria-hidden="true"></div>
         <div>
           <h1>ARC//LEVEL</h1>
-          <div class="sub">Solo‑Leveling‑style stats. Daily penalties. Weekly grind. Local save.</div>
+          <div class="sub">Solo-Leveling-style stats. Daily penalties. Weekly grind. Local save.</div>
         </div>
       </div>
-      <div class="pill"><span>🗄️</span><span id="saveStatus">Auto‑saved</span></div>
+      <div class="pill" aria-live="polite"><span>🗄️</span><span id="saveStatus">Auto-saved</span></div>
     </header>
 
     <div class="grid">
@@ -101,30 +104,30 @@
 
           <!-- Performance inputs (point-in-time, not daily) -->
           <div class="col-4">
-            <label>Stamina — 2.4 km time (mm:ss)</label>
+            <label for="staminaMin">Stamina — 2.4 km time (mm:ss)</label>
             <div class="flex">
-              <input id="staminaMin" type="number" min="0" placeholder="mm">
+              <input id="staminaMin" type="number" min="0" placeholder="mm" inputmode="numeric">
               <span>:</span>
-              <input id="staminaSec" type="number" min="0" max="59" placeholder="ss">
+              <input id="staminaSec" type="number" min="0" max="59" placeholder="ss" inputmode="numeric">
             </div>
             <div class="hint small">12:00 = 50 pts; every <b>6.2s faster</b> +1.</div>
           </div>
 
           <div class="col-4">
-            <label>Speed — 400 m time (seconds)</label>
-            <input id="speedSec" type="number" min="0" step="0.01" placeholder="e.g., 69.50">
+            <label for="speedSec">Speed — 400 m time (seconds)</label>
+            <input id="speedSec" type="number" min="0" step="0.01" placeholder="e.g., 69.50" inputmode="decimal">
             <div class="hint small">71.1 s = 50 pts; every <b>0.56s faster</b> +1.</div>
           </div>
 
           <div class="col-4">
-            <label>Strength — consecutive pushups</label>
-            <input id="pushups" type="number" min="0" max="200" placeholder="e.g., 55">
+            <label for="pushups">Strength — consecutive pushups</label>
+            <input id="pushups" type="number" min="0" max="200" placeholder="e.g., 55" inputmode="numeric">
             <div class="hint small">50 pushups = 50 pts; each pushup = +1.</div>
           </div>
 
           <div class="col-4">
-            <label>Looks — body fat %</label>
-            <input id="bodyfat" type="number" min="3" max="60" step="0.01" placeholder="e.g., 24.5">
+            <label for="bodyfat">Looks — body fat %</label>
+            <input id="bodyfat" type="number" min="3" max="60" step="0.01" placeholder="e.g., 24.5" inputmode="decimal">
             <div class="hint small">30% = 0 pts; every <b>0.18%</b> lower +1.</div>
           </div>
 
@@ -139,8 +142,14 @@
                     <div class="hint small">Calories tracked on MFP (+0.25) • 7am wake <em>and</em> 8h sleep (+0.5)</div>
                   </div>
                   <div>
-                    <div class="switch"><input id="discCalories" type="checkbox"> <label>Tracked calories</label></div>
-                    <div class="switch"><input id="discSleep" type="checkbox"> <label>Woke 7:00 + 8h sleep</label></div>
+                    <div class="switch">
+                      <input id="discCalories" type="checkbox">
+                      <label for="discCalories">Tracked calories</label>
+                    </div>
+                    <div class="switch">
+                      <input id="discSleep" type="checkbox">
+                      <label for="discSleep">Woke 7:00 + 8h sleep</label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -152,9 +161,18 @@
                     <div class="hint small">Shower 2×, skincare AM+PM, brush 2× → if ALL true: +2, otherwise −2</div>
                   </div>
                   <div>
-                    <div class="switch"><input id="hyShower" type="checkbox"> <label>Shower 2×</label></div>
-                    <div class="switch"><input id="hySkin" type="checkbox"> <label>Skincare AM/PM</label></div>
-                    <div class="switch"><input id="hyBrush" type="checkbox"> <label>Brush 2×</label></div>
+                    <div class="switch">
+                      <input id="hyShower" type="checkbox">
+                      <label for="hyShower">Shower 2×</label>
+                    </div>
+                    <div class="switch">
+                      <input id="hySkin" type="checkbox">
+                      <label for="hySkin">Skincare AM/PM</label>
+                    </div>
+                    <div class="switch">
+                      <input id="hyBrush" type="checkbox">
+                      <label for="hyBrush">Brush 2×</label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -165,7 +183,10 @@
                     <strong>Posture</strong>
                     <div class="hint small">Did posture exercises (+1) else −1</div>
                   </div>
-                  <div class="switch"><input id="postureDid" type="checkbox"> <label>Completed</label></div>
+                  <div class="switch">
+                    <input id="postureDid" type="checkbox">
+                    <label for="postureDid">Completed</label>
+                  </div>
                 </div>
               </div>
 
@@ -176,8 +197,8 @@
                     <div class="hint small">Goal: ≥60 min study per day. If you do this for ALL 7 days of a week, +1 that week.</div>
                   </div>
                   <div class="flex">
-                    <label class="small">Study minutes today</label>
-                    <input id="studyMin" type="number" min="0" step="1" style="width:110px">
+                    <label class="small" for="studyMin">Study minutes today</label>
+                    <input id="studyMin" type="number" min="0" step="1" style="width:110px" inputmode="numeric">
                   </div>
                 </div>
               </div>
@@ -214,6 +235,14 @@
             <div class="statbar"><span id="barStrength" style="width:0%"></span></div>
             <div class="flex small"><span class="mono" id="valStrength">0.0</span><span class="hint right" id="descStrength">—</span></div>
           </div>
+        </div>
+
+        <!-- PR STRIP -->
+        <div class="kpi kpi-4" style="margin-top:6px">
+          <div class="tile"><div class="small"><b>PR Stamina</b> <span class="right mono" id="prStam">—</span></div></div>
+          <div class="tile"><div class="small"><b>PR Speed</b> <span class="right mono" id="prSpeed">—</span></div></div>
+          <div class="tile"><div class="small"><b>PR Pushups</b> <span class="right mono" id="prPush">—</span></div></div>
+          <div class="tile"><div class="small"><b>PR Body Fat</b> <span class="right mono" id="prBF">—</span></div></div>
         </div>
 
         <div class="kpi" style="margin-top:10px">
@@ -276,25 +305,34 @@
 <script>
 /* ======= UTIL ======= */
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-const fmt=(n,dec=1)=>Number.isFinite(n)?n.toFixed(dec):'0.0';
+const fmt=(n,dec=1)=>Number.isFinite(n)?Number(n).toFixed(dec):'0.0';
 const byId=id=>document.getElementById(id);
-const todayStr=()=>new Date().toISOString().slice(0,10);
+// Local date string (avoids UTC shift)
+const todayStr=()=>{
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
 const toISO=(d)=>new Date(d+"T00:00:00");
 
 /* ======= STORAGE ======= */
 const storeKey="arclevel_v1";
 let db = JSON.parse(localStorage.getItem(storeKey)||'{"logs":{},"perf":{}}');
+// Ensure PR structure exists for older saves
+if(!db.pr){ db.pr = { staminaBest:null, speedBest:null, pushupsBest:null, bodyfatBest:null }; }
 
 /* db structure:
 {
   perf:{ staminaSec: null, speed400: null, pushups:null, bodyfat:null },
+  pr:  { staminaBest:null, speedBest:null, pushupsBest:null, bodyfatBest:null },
   logs:{
     "YYYY-MM-DD":{
        discCalories:true/false, discSleep:true/false,
        hyShower:true/false, hySkin:true/false, hyBrush:true/false,
        postureDid:true/false, studyMin:number
-    },
-    ...
+    }
   }
 }
 */
@@ -302,7 +340,7 @@ let db = JSON.parse(localStorage.getItem(storeKey)||'{"logs":{},"perf":{}}');
 function save(){
   localStorage.setItem(storeKey, JSON.stringify(db));
   byId('saveStatus').textContent='Saved ✔';
-  setTimeout(()=>byId('saveStatus').textContent='Auto‑saved',1200);
+  setTimeout(()=>byId('saveStatus').textContent='Auto-saved',1200);
 }
 
 /* ======= INPUT INIT ======= */
@@ -313,13 +351,13 @@ function initDate(){
 
 function loadInputsFromPerf(){
   const p=db.perf||{};
-  if(p.staminaSec!=null){
+  if(Number.isFinite(p.staminaSec)&&p.staminaSec>0){
     const mm=Math.floor(p.staminaSec/60), ss=Math.round(p.staminaSec%60);
     byId('staminaMin').value=mm; byId('staminaSec').value=ss;
   }
-  if(p.speed400!=null) byId('speedSec').value=p.speed400;
-  if(p.pushups!=null) byId('pushups').value=p.pushups;
-  if(p.bodyfat!=null) byId('bodyfat').value=p.bodyfat;
+  if(Number.isFinite(p.speed400)) byId('speedSec').value=p.speed400;
+  if(Number.isFinite(p.pushups)) byId('pushups').value=p.pushups;
+  if(Number.isFinite(p.bodyfat)) byId('bodyfat').value=p.bodyfat;
 }
 
 function readPerfFromInputs(){
@@ -333,7 +371,7 @@ function readPerfFromInputs(){
 
 /* ======= SAVE TODAY LOG ======= */
 byId('saveLog').addEventListener('click', ()=>{
-  // perf (overwrite with latest known bests/values as you enter them)
+  // perf (overwrite with latest known values as you enter them)
   const perf=readPerfFromInputs();
   db.perf = {
     staminaSec: Number.isFinite(perf.staminaSec)&&perf.staminaSec>0 ? perf.staminaSec : (db.perf?.staminaSec ?? null),
@@ -341,6 +379,21 @@ byId('saveLog').addEventListener('click', ()=>{
     pushups:   Number.isFinite(perf.pushups)  ? perf.pushups  : (db.perf?.pushups ?? null),
     bodyfat:   Number.isFinite(perf.bodyfat)  ? perf.bodyfat  : (db.perf?.bodyfat ?? null),
   };
+
+  // Update PRs (fastest/lower is better for times/BF; higher is better for reps)
+  const p = db.perf;
+  if(Number.isFinite(p.staminaSec) && p.staminaSec>0){
+    db.pr.staminaBest = (db.pr.staminaBest==null) ? p.staminaSec : Math.min(db.pr.staminaBest, p.staminaSec);
+  }
+  if(Number.isFinite(p.speed400) && p.speed400>0){
+    db.pr.speedBest = (db.pr.speedBest==null) ? p.speed400 : Math.min(db.pr.speedBest, p.speed400);
+  }
+  if(Number.isFinite(p.pushups) && p.pushups>0){
+    db.pr.pushupsBest = (db.pr.pushupsBest==null) ? p.pushups : Math.max(db.pr.pushupsBest, p.pushups);
+  }
+  if(Number.isFinite(p.bodyfat) && p.bodyfat>0){
+    db.pr.bodyfatBest = (db.pr.bodyfatBest==null) ? p.bodyfat : Math.min(db.pr.bodyfatBest, p.bodyfat);
+  }
 
   // daily log
   const d=byId('logDate').value || todayStr();
@@ -363,18 +416,18 @@ byId('saveLog').addEventListener('click', ()=>{
 function staminaPoints(sec){
   if(!Number.isFinite(sec) || sec<=0) return 0;
   const base=50 + ((720 - sec) / 6.2);
-  return clamp(base, 1, 100);
+  return clamp(base, 0, 100);
 }
 // Speed: 400m -> 71.1s = 50; every 0.56s faster +1
 function speedPoints(sec400){
   if(!Number.isFinite(sec400) || sec400<=0) return 0;
   const base=50 + ((71.1 - sec400) / 0.56);
-  return clamp(base, 1, 100);
+  return clamp(base, 0, 100);
 }
 // Strength: pushups -> 50 = 50; +1 per rep
 function strengthPoints(pushups){
   if(!Number.isFinite(pushups) || pushups<=0) return 0;
-  return clamp(pushups, 1, 100);
+  return clamp(pushups, 0, 100);
 }
 // Looks: 30% = 0; every 0.18% lower +1
 function looksPoints(bodyfat){
@@ -394,13 +447,10 @@ function sumDailyStats(logs){
 
   for(const day in logs){
     const L=logs[day];
-    // Discipline
     discipline += (L.discCalories ? +0.25 : -0.25);
     discipline += (L.discSleep ? +0.5  : -0.5);
-    // Hygiene
     const allH = !!(L.hyShower && L.hySkin && L.hyBrush);
     hygiene += allH ? +2 : -2;
-    // Posture
     posture += (L.postureDid ? +1 : -1);
   }
   return {discipline, hygiene, posture};
@@ -408,8 +458,7 @@ function sumDailyStats(logs){
 
 // ISO week utilities
 function isoWeekKey(dateStr){
-  const d = toISO(dateStr);
-  // ISO week logic
+  const d = toISO(dateStr); // local midnight for that date
   const dayNum = (d.getUTCDay() + 6) % 7; // Mon=0..Sun=6
   const thursday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - dayNum + 3));
   const week1 = new Date(Date.UTC(thursday.getUTCFullYear(),0,4));
@@ -418,7 +467,6 @@ function isoWeekKey(dateStr){
 }
 
 function computeIntelligence(logs){
-  // group minutes by iso week, check if all 7 days >= 60
   const weeks = {};
   for(const day in logs){
     const key = isoWeekKey(day);
@@ -428,11 +476,8 @@ function computeIntelligence(logs){
   let intel=0;
   for(const w in weeks){
     const days = weeks[w];
-    // need to ensure 7 distinct dates inside that ISO week are present with >=60
-    // We'll compute over the actual 7 dates of that week
     const [yearPart, wkPart] = w.split("-W");
     const year = Number(yearPart), wk = Number(wkPart);
-    // get Monday of ISO week
     const simple = new Date(Date.UTC(year,0,4 + (wk-1)*7));
     const dow = (simple.getUTCDay()+6)%7;
     const monday = new Date(simple); monday.setUTCDate(simple.getUTCDate() - dow);
@@ -450,34 +495,36 @@ function computeIntelligence(logs){
 
 /* ======= RECALC + RENDER ======= */
 function recalcAndRender(){
-  // performance-derived stats
   const p=db.perf||{};
   const stam = staminaPoints(p.staminaSec);
   const spd  = speedPoints(p.speed400);
   const str  = strengthPoints(p.pushups);
   const lks  = looksPoints(p.bodyfat);
 
-  // daily accumulative stats
   const {discipline, hygiene, posture} = sumDailyStats(db.logs||{});
   const intel = computeIntelligence(db.logs||{});
 
-  // capped 0–100 visuals (your range is 1–100 for some; we clamp visuals)
   setStat('Stamina', stam, `${fmt(p.staminaSec??0,0)}s`);
   setStat('Speed', spd, `${fmt(p.speed400??0,2)}s`);
   setStat('Strength', str, `${p.pushups??0} reps`);
-  setStat('Looks', lks, `${p.bodyfat??0}%`);
+  setStat('Looks', lks, `${fmt(p.bodyfat??0,1)}%`);
   setStat('Discipline', clamp(discipline,0,100), `${discipline>=0?'+':''}${discipline.toFixed(2)} total`);
   setStat('Hygiene', clamp(hygiene,0,100), `${hygiene>=0?'+':''}${hygiene.toFixed(0)} total`);
   setStat('Posture', clamp(posture,0,100), `${posture>=0?'+':''}${posture.toFixed(0)} total`);
   setStat('Intelligence', clamp(intel,0,100), `${intel} full weeks`);
 
-  // total power = average of the eight categories after clamping to 0–100
   const arr=[stam,spd,str,intel,discipline,hygiene,posture,lks].map(x=>clamp(x,0,100));
   const total = arr.reduce((a,b)=>a+b,0)/arr.length;
   byId('barTotal').style.width = `${total}%`;
   byId('valTotal').textContent = fmt(total,1);
 
-  // history table
+  // Render PRs
+  const pr=db.pr||{};
+  byId('prStam').textContent  = Number.isFinite(pr.staminaBest) ? `${fmt(pr.staminaBest,0)}s` : '—';
+  byId('prSpeed').textContent = Number.isFinite(pr.speedBest)   ? `${fmt(pr.speedBest,2)}s`   : '—';
+  byId('prPush').textContent  = Number.isFinite(pr.pushupsBest) ? `${fmt(pr.pushupsBest,0)} reps` : '—';
+  byId('prBF').textContent    = Number.isFinite(pr.bodyfatBest) ? `${fmt(pr.bodyfatBest,1)}%` : '—';
+
   renderHistory();
 }
 
@@ -535,9 +582,9 @@ byId('exportBtn').addEventListener('click', ()=>{
   const blob = new Blob([JSON.stringify(db,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href=url; a.download=`arclevel_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.href=url; a.download=`arclevel_backup_${todayStr()}.json`;
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(()=>URL.revokeObjectURL(url), 0);
 });
 
 byId('importFile').addEventListener('change', (e)=>{
@@ -546,8 +593,18 @@ byId('importFile').addEventListener('change', (e)=>{
   reader.onload=()=>{
     try{
       const data=JSON.parse(reader.result);
-      if(!data.logs || !data.perf) throw new Error('Invalid file');
-      db=data; save(); loadInputsFromPerf(); recalcAndRender();
+      if(!data || typeof data!=='object') throw new Error('Invalid file');
+      db={
+        logs: data.logs || {},
+        perf: data.perf || {},
+        pr:   (data.pr && typeof data.pr==='object')
+              ? { staminaBest:data.pr.staminaBest ?? null,
+                  speedBest:data.pr.speedBest ?? null,
+                  pushupsBest:data.pr.pushupsBest ?? null,
+                  bodyfatBest:data.pr.bodyfatBest ?? null }
+              : { staminaBest:null, speedBest:null, pushupsBest:null, bodyfatBest:null }
+      };
+      save(); loadInputsFromPerf(); recalcAndRender();
     }catch(err){ alert('Import failed: ' + err.message); }
   };
   reader.readAsText(file);
@@ -555,7 +612,7 @@ byId('importFile').addEventListener('change', (e)=>{
 
 byId('wipeBtn').addEventListener('click', ()=>{
   if(confirm('Wipe ALL data?')){
-    db={logs:{}, perf:{}};
+    db={logs:{}, perf:{}, pr:{ staminaBest:null, speedBest:null, pushupsBest:null, bodyfatBest:null }};
     save(); loadInputsFromPerf(); recalcAndRender();
   }
 });
@@ -567,6 +624,13 @@ byId('recalc').addEventListener('click', recalcAndRender);
 initDate();
 loadInputsFromPerf();
 recalcAndRender();
+
+/* ======= PWA: SERVICE WORKER REGISTER ======= */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
